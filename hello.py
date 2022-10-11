@@ -31,11 +31,11 @@ def get_existing_articles():
 
 def get_articles():
     total_articles_fetched = 0
-    existing_articles_length = len(get_existing_articles())
+    existing_articles = get_existing_articles()
+    existing_articles_length = len(existing_articles)
     current_page = existing_articles_length / 10 + 1
 
     while total_articles_fetched < ARTICLES_TO_FETCH:
-        existing_articles = get_existing_articles()
         page_to_fetch = current_page
 
         html = fetch_articles(page_to_fetch)
@@ -43,14 +43,14 @@ def get_articles():
         # we don't have any more articles on this subject
         if len(articles) == 0:
             break
-        updated_articles = articles + existing_articles
+        existing_articles += articles
         total_articles_fetched += len(articles)
 
         with open("news.json", "w") as write_file:
-            json.dump(updated_articles, write_file, indent=4)
+            json.dump(existing_articles, write_file, indent=4)
 
-        print(f"Successfully Fetched {len(updated_articles)} articles")
-        current_page +=1
+        print(f"Successfully Fetched {len(existing_articles)} articles")
+        current_page += 1
 
 
 def main():
