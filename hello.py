@@ -17,7 +17,7 @@ def fetch_articles(current_page):
     except RequestException:
         sys.exit("Oops! Some Error occurred while fetching the Post.")
     else:
-        return response.text
+        return response.json()
 
 
 def get_existing_articles():
@@ -39,19 +39,18 @@ def get_last_fetched_page():
 
 
 def get_articles():
-    total_articles_fetched = 0
+    last_fetched_page = get_last_fetched_page()
+    current_articles_fetched = 0
     existing_articles = get_existing_articles()
 
-    while total_articles_fetched < ARTICLES_TO_FETCH:
-        last_fetched_page = get_last_fetched_page()
+    while current_articles_fetched < ARTICLES_TO_FETCH:
         page_to_fetch = last_fetched_page + 1
-        html = fetch_articles(page_to_fetch)
-        articles = json.loads(html).get("data")
+        articles = fetch_articles(page_to_fetch).get("data")
         # we don't have any more articles on this subject
         if len(articles) == 0:
             break
         existing_articles += articles
-        total_articles_fetched += len(articles)
+        current_articles_fetched += len(articles)
 
         with open("news.json", "w") as write_file:
             json.dump(existing_articles, write_file, indent=4)
