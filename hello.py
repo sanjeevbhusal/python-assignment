@@ -1,6 +1,7 @@
 import requests
 from requests.exceptions import RequestException
 import json
+from json.decoder import JSONDecodeError
 import sys
 
 ARTICLE_PER_PAGE = 10
@@ -20,10 +21,12 @@ def fetch_articles(current_page):
 
 
 def get_existing_articles():
-    with open("news.json", "a+") as f:
-        f.seek(0)
-        news = f.read()
-        return json.loads(news) if len(news) > 0 else []
+    try:
+        with open("news.json", "r") as read_file:
+            news = json.load(read_file)
+            return news
+    except (FileNotFoundError, JSONDecodeError):
+        return []
 
 
 def get_articles():
@@ -37,8 +40,8 @@ def get_articles():
         updated_articles = articles + existing_articles
         total_articles_fetched += ARTICLE_PER_PAGE
 
-        with open("news.json", "w") as f:
-            f.write(str(json.dumps(updated_articles)))
+        with open("news.json", "w") as write_file:
+            json.dump(updated_articles, write_file, indent=4)
 
 
 def main():
