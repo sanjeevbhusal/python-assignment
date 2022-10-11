@@ -16,7 +16,6 @@ def fetch_articles(current_page):
     except RequestException:
         sys.exit("Oops! Some Error occurred while fetching the Post.")
     else:
-        print(f"Successfully Fetched {current_page * 10} articles")
         return response.text
 
 
@@ -42,6 +41,8 @@ def get_articles():
 
         with open("news.json", "w") as write_file:
             json.dump(updated_articles, write_file, indent=4)
+
+        print(f"Successfully Fetched {len(updated_articles)} articles")
 
 
 def main():
