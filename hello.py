@@ -29,15 +29,22 @@ def get_existing_articles():
         return []
 
 
+def get_last_fetched_page():
+    try:
+        with open("current_page.txt", "r") as read_file:
+            last_fetched_page = json.load(read_file).get("last_fetched_page")
+            return last_fetched_page
+    except (FileNotFoundError, JSONDecodeError):
+        return 0
+
+
 def get_articles():
     total_articles_fetched = 0
     existing_articles = get_existing_articles()
-    existing_articles_length = len(existing_articles)
-    current_page = existing_articles_length / 10 + 1
 
     while total_articles_fetched < ARTICLES_TO_FETCH:
-        page_to_fetch = current_page
-
+        last_fetched_page = get_last_fetched_page()
+        page_to_fetch = last_fetched_page + 1
         html = fetch_articles(page_to_fetch)
         articles = json.loads(html).get("data")
         # we don't have any more articles on this subject
@@ -48,9 +55,10 @@ def get_articles():
 
         with open("news.json", "w") as write_file:
             json.dump(existing_articles, write_file, indent=4)
+        with open("current_page.txt", "w") as write_file:
+            json.dump({"last_fetched_page": page_to_fetch}, write_file)
 
         print(f"Successfully Fetched {len(existing_articles)} articles")
-        current_page += 1
 
 
 def main():
