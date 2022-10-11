@@ -20,28 +20,18 @@ def fetch_articles(current_page):
         return response.json()
 
 
-def get_existing_articles():
+def get_existing_articles_detail():
     try:
         with open("news.json", "r") as read_file:
-            news = json.load(read_file)
-            return news
+            json_data = json.load(read_file)
+            return json_data.get("articles"), json_data.get("last_fetched_page")
     except (FileNotFoundError, JSONDecodeError):
-        return []
-
-
-def get_last_fetched_page():
-    try:
-        with open("current_page.txt", "r") as read_file:
-            last_fetched_page = json.load(read_file).get("last_fetched_page")
-            return last_fetched_page
-    except (FileNotFoundError, JSONDecodeError):
-        return 0
+        return [], 0
 
 
 def get_articles():
-    last_fetched_page = get_last_fetched_page()
     current_articles_fetched = 0
-    existing_articles = get_existing_articles()
+    existing_articles, last_fetched_page = get_existing_articles_detail()
 
     while current_articles_fetched < ARTICLES_TO_FETCH:
         page_to_fetch = last_fetched_page + 1
@@ -53,9 +43,7 @@ def get_articles():
         current_articles_fetched += len(articles)
 
         with open("news.json", "w") as write_file:
-            json.dump(existing_articles, write_file, indent=4)
-        with open("current_page.txt", "w") as write_file:
-            json.dump({"last_fetched_page": page_to_fetch}, write_file)
+            json.dump({"last_fetched_page": page_to_fetch, "articles": existing_articles}, write_file, indent=4)
 
         print(f"Successfully Fetched {len(existing_articles)} articles")
 
